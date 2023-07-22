@@ -24,14 +24,4 @@ namespace yuisanae2f.StrToStrAI
         [ColumnName("PredictedLabel")]
         public string? output;
     }
-
-    public class Index
-    {
-        static int Main()
-        {
-            Console.WriteLine("StrToStrAI by LouiBooks");
-            Console.WriteLine("Source: https://github.com/Louibooks/StrToStrAI");
-            return 0;
-        }
-    }
 }
