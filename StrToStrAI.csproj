@@ -12,6 +12,7 @@
     <Description>Make an instance for easy AI handling.</Description>
     <Copyright>LouiBooks</Copyright>
     <Company>LouiBooks</Company>
+    <RepositoryUrl>https://github.com/Louibooks/StrToStrAI</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
