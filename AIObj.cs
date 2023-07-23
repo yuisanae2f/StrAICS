@@ -37,25 +37,24 @@ namespace yuisanae2f.StrToStrAI
 
         /// <param name="trainingDataView">Fully processed DataView</param>
         /// <param name="pipeline">Fully processed pipeline for Learning</param>
-        /// <returns>Engine for the prediction</returns>
-        protected PredictionEngine<T, TPredict> getEngine(IDataView trainingDataView, IEstimator<ITransformer> pipeline)
+        /// <returns>Model for the prediction</returns>
+        protected ITransformer getModel(IDataView trainingDataView, IEstimator<ITransformer> pipeline)
         {
             var trainingPipeline = pipeline.Append(_mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy("Label", "Features"))
                 .Append(_mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
             var _trainedModel = trainingPipeline.Fit(trainingDataView);
-            var _predEngine = _mlContext.Model.CreatePredictionEngine<T, TPredict>(_trainedModel);
-            return _predEngine;
+            return _trainedModel;
         }
 
-        /// <param name="model">Engine for the prediction</param>
+        /// <param name="model">Model for the prediction</param>
         /// <param name="target">
         /// Input: <br/>
         /// make sure that you don't fill the output member in that context.
         /// </param>
         /// <returns>Would return a prediction for the <paramref name="target"/></returns>
-        protected TPredict getPredict(PredictionEngine<T, TPredict> model, T target)
+        protected TPredict getPredict(PredictionEngine<T, TPredict> engine, T target)
         {
-            return model.Predict(target);
+            return engine.Predict(target);
         }
 
         /// <param name="resArr">Parsed list of <typeparamref name="T"/> for the training.</param>
@@ -63,6 +62,29 @@ namespace yuisanae2f.StrToStrAI
         protected IDataView? splitDataView(T[] resArr)
         {
             return _mlContext.Data.LoadFromEnumerable(resArr);
+        }
+
+        /// <summary>
+        /// Would save a model in given path as a file.
+        /// </summary>
+        /// <param name="path">Given model will be saved here</param>
+        /// <param name="model">AI Model made</param>
+        /// <param name="dataView">DataView splited. Check <c>splitDataView</c> method</param>
+        protected void saveModel(string path, ITransformer model, IDataView dataView)
+        {
+            using (var fs = new FileStream(path, FileMode.Create))
+                _mlContext.Model.Save(model, dataView.Schema, fs);
+        }
+
+        /// <param name="path">The path where model has been saved.</param>
+        /// <returns>Loaded AI model from the file</returns>
+        protected ITransformer loadModel(string path)
+        {
+            ITransformer model;
+
+            using (var stream = new FileStream(path, FileMode.Open))
+                model = _mlContext.Model.Load(stream, out var modelSchema);
+            return model;
         }
     }
 
@@ -76,9 +98,35 @@ namespace yuisanae2f.StrToStrAI
         where TPredict : class, new()
     {
         /// <summary>
+        /// Would save a model into zip file.
+        /// </summary>
+        /// <param name="path"></param>
+        public void save(string path = "model.zip")
+        {
+            saveModel(path, model, dataView);
+        }
+
+        /// <summary>
+        /// Would load a model from the zip file.
+        /// </summary>
+        /// <param name="path"></param>
+        public void load(string path = "model.zip")
+        {
+            model = loadModel(path);
+            engine = _mlContext.Model.CreatePredictionEngine<T, TPredict>(model);
+            return;
+        }
+
+        /// <summary>
+        /// Engine, will actually do predict.
+        /// </summary>
+        public PredictionEngine<T, TPredict> engine;
+
+        /// <summary>
         /// Splited dataview
         /// </summary>
-        public IDataView? dataView { get { return _dataView; } } private IDataView? _dataView;
+        public IDataView? dataView { get { return _dataView; } }
+        private IDataView? _dataView;
 
         /// <summary>
         /// It would split this AI an dataView.
@@ -87,9 +135,9 @@ namespace yuisanae2f.StrToStrAI
         public void setDataView(T[] resArr) { _dataView = splitDataView(resArr); }
 
         /// <summary>
-        /// Engine, it would be the object for get result.
+        /// AI Model, it would be the object for get result.
         /// </summary>
-        protected PredictionEngine<T, TPredict> engine;
+        protected ITransformer model;
 
         /// <summary>
         /// Pipeline for the engine training
@@ -105,9 +153,11 @@ namespace yuisanae2f.StrToStrAI
         /// </param>
         public void train(IDataView? dataView = null)
         {
-            if (dataView == null) engine = getEngine(_dataView, pipeline);
+            if (dataView == null) model = getModel(_dataView, pipeline);
             else if (_dataView == null) return;
-            else engine = getEngine(dataView, pipeline);
+            else model = getModel(dataView, pipeline);
+
+            engine = _mlContext.Model.CreatePredictionEngine<T, TPredict>(model);
         }
 
         /// <summary>
@@ -115,8 +165,9 @@ namespace yuisanae2f.StrToStrAI
         /// </summary>
         /// <param name="target">Input Object. Make sure it is made of <typeparamref name="T"/></param>
         /// <returns>Predicted Value made of <typeparamref name="TPredict"/></returns>
-        public TPredict predict(T target) {
-            return engine.Predict(target);
+        public TPredict predict(T target)
+        {
+            return getPredict(engine, target);
         }
 
         /// <summary>
