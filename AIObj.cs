@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML;
 
-namespace yuisanae2f.StrToStrAI
+namespace yuisanae2f.StrToStrAICS
 {
     /// <summary>
     /// FunctionBundle Root for the AIObj.<br/>

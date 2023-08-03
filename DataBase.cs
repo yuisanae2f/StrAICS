@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML.Data;
 
-namespace yuisanae2f.StrToStrAI
+namespace yuisanae2f.StrToStrAICS
 {
     /// <summary>
     /// An Input DataBase Format for this Context. <br/>
