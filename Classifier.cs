@@ -1,16 +1,12 @@
 ﻿using Microsoft.ML;
 
-namespace yuisanae2f.StrToStrAICS
+namespace yuisanae2f.StrMLCS
 {
     /// <summary>
     /// FunctionBundle Root for the AIObj.<br/>
     /// Make an inheritance of this to make a new StrToStr thing.
     /// </summary>
-    /// <typeparam name="T">Input Format for the Model (for the training also)</typeparam>
-    /// <typeparam name="TPredict">Output Format for the Model</typeparam>
-    public class _AIObj<T, TPredict>
-        where T : class
-        where TPredict : class, new()
+    public class _Classifier<T>
     {
         /// <summary>
         /// Context for the each Machine Learning
@@ -29,8 +25,8 @@ namespace yuisanae2f.StrToStrAICS
                 .Append(_mlContext.Transforms.Text.FeaturizeText(inputColumnName: "input", outputColumnName: "inputFeaturised"));
 
             var pipeline3 = pipeline2
-                .Append(_mlContext.Transforms.Concatenate("Features", "inputFeaturised"))
-                .AppendCacheCheckpoint(_mlContext);
+                .AppendCacheCheckpoint(_mlContext)
+                .Append(_mlContext.Transforms.Concatenate("Features", "inputFeaturised"));
 
             return pipeline3;
         }
@@ -42,6 +38,7 @@ namespace yuisanae2f.StrToStrAICS
         {
             var trainingPipeline = pipeline.Append(_mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy("Label", "Features"))
                 .Append(_mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
+                
             var _trainedModel = trainingPipeline.Fit(trainingDataView);
             return _trainedModel;
         }
@@ -52,14 +49,14 @@ namespace yuisanae2f.StrToStrAICS
         /// make sure that you don't fill the output member in that context.
         /// </param>
         /// <returns>Would return a prediction for the <paramref name="target"/></returns>
-        protected TPredict getPredict(PredictionEngine<T, TPredict> engine, T target)
+        protected Response<T> getPredict(PredictionEngine<Request<T>, Response<T>> engine, Request<T> target)
         {
             return engine.Predict(target);
         }
 
         /// <param name="resArr">Parsed list of <typeparamref name="T"/> for the training.</param>
         /// <returns>DataView splited for the training.</returns>
-        protected IDataView? splitDataView(T[] resArr)
+        protected IDataView? splitDataView(Request<T>[] resArr)
         {
             return _mlContext.Data.LoadFromEnumerable(resArr);
         }
@@ -91,11 +88,7 @@ namespace yuisanae2f.StrToStrAICS
     /// <summary>
     /// StrToStr AI 101
     /// </summary>
-    /// <typeparam name="T">Input Format for the Model (for the training also)</typeparam>
-    /// <typeparam name="TPredict">Output Format for the Model</typeparam>
-    public class AIObj<T, TPredict> : _AIObj<T, TPredict>
-        where T : class
-        where TPredict : class, new()
+    public class Classifier<T> : _Classifier<T>
     {
         /// <summary>
         /// Would save a model into zip file.
@@ -113,14 +106,14 @@ namespace yuisanae2f.StrToStrAICS
         public void load(string path = "model.zip")
         {
             model = loadModel(path);
-            engine = _mlContext.Model.CreatePredictionEngine<T, TPredict>(model);
+            engine = _mlContext.Model.CreatePredictionEngine<Request<T>, Response<T>>(model);
             return;
         }
 
         /// <summary>
         /// Engine, will actually do predict.
         /// </summary>
-        public PredictionEngine<T, TPredict> engine;
+        public PredictionEngine<Request<T>, Response<T>> engine;
 
         /// <summary>
         /// Splited dataview
@@ -132,7 +125,7 @@ namespace yuisanae2f.StrToStrAICS
         /// It would split this AI an dataView.
         /// </summary>
         /// <param name="resArr"></param>
-        public void setDataView(T[] resArr) { _dataView = splitDataView(resArr); }
+        public void setDataView(Request<T>[] resArr) { _dataView = splitDataView(resArr); }
 
         /// <summary>
         /// AI Model, it would be the object for get result.
@@ -157,7 +150,7 @@ namespace yuisanae2f.StrToStrAICS
             else if (_dataView == null) return;
             else model = getModel(dataView, pipeline);
 
-            engine = _mlContext.Model.CreatePredictionEngine<T, TPredict>(model);
+            engine = _mlContext.Model.CreatePredictionEngine<Request<T>, Response<T>>(model);
         }
 
         /// <summary>
@@ -165,9 +158,9 @@ namespace yuisanae2f.StrToStrAICS
         /// </summary>
         /// <param name="target">Input Object. Make sure it is made of <typeparamref name="T"/></param>
         /// <returns>Predicted Value made of <typeparamref name="TPredict"/></returns>
-        public TPredict predict(T target)
+        public Response<T> predict(string target)
         {
-            return getPredict(engine, target);
+            return getPredict(engine, new Request<T>() { input = target } );
         }
 
         /// <summary>
@@ -177,7 +170,7 @@ namespace yuisanae2f.StrToStrAICS
         /// Custom mlContext. <br/>
         /// If not given it would generate by itself.
         /// </param>
-        public AIObj(MLContext? mLContext = null)
+        public Classifier(MLContext? mLContext = null)
         {
             if (mLContext == null) _mlContext = new MLContext(); else _mlContext = mLContext;
             pipeline = processData();
