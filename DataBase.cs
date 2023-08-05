@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML.Data;
 
-namespace yuisanae2f.StrMLCS
+namespace yuisanae2f.StrAICS
 {
     /// <summary>
     /// An Input DataBase Format for this Context. <br/>
@@ -23,8 +23,5 @@ namespace yuisanae2f.StrMLCS
     {
         [ColumnName("PredictedLabel")]
         public T? predicted;
-
-        [ColumnName("scores")]
-        public float[] scores { get; set; }
     }
 }
