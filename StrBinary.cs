@@ -1,21 +1,22 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
-using System;
-using System.Linq;
-using Tensorflow.Contexts;
-using TensorFlow;
 
 namespace yuisanae2f.StrAICS.ML
 {
     namespace _Binary
     {
-        public class Response
+        public class Response : Response<bool>
         {
-            [ColumnName("PredictedLabel")]
-            bool predicted { get; set; }
+            /// <summary>
+            /// The probability that given input could be predicted "true"
+            /// </summary>
             [ColumnName("Probability")]
             public float probability { get; set; }
 
+            /// <summary>
+            /// The probability that the prediction had now isn't wrong
+            /// </summary>
+            public float score { get { return predicted ? probability : 1 - probability; } }
         }
     }
 

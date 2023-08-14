@@ -1,5 +1,4 @@
 ﻿using Microsoft.ML;
-using Tensorflow;
 
 namespace yuisanae2f.StrAICS.ML
 {

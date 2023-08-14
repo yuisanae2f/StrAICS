@@ -5,7 +5,7 @@ namespace yuisanae2f.StrAICS.ML
     /// <summary>
     /// StrToStr AI 101
     /// </summary>
-    public class Classifier<T> : Root<T, Response<string>>
+    public class Classifier<T> : Root<T, Response<T>>
     {
         /// <summary>
         /// Initialiser for this Object.
@@ -17,17 +17,10 @@ namespace yuisanae2f.StrAICS.ML
         public Classifier(MLContext? mLContext = null) : base(mLContext) 
         {
             pipeline =
-                _mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "output", outputColumnName: "Label")
-                //_mlContext.Transforms.Text.FeaturizeText(inputColumnName: "input", outputColumnName: "inputFeaturised")
+                _mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Label", outputColumnName: "Label")
                 .Append(_mlContext.Transforms.Text.FeaturizeText(inputColumnName: "input", outputColumnName: "inputFeaturised"))
                 .Append(_mlContext.Transforms.Concatenate("Features", "inputFeaturised"))
                 .Append(_mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy("Label", "Features"))
-                .Append(_mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
-
-            pipeline = 
-                _mlContext.Transforms.Text.FeaturizeText(inputColumnName: "input", outputColumnName: "inputFeaturised")
-                .Append(_mlContext.Transforms.Concatenate("Features", "inputFeaturised"))
-                .Append(_mlContext.MulticlassClassification.Trainers.SdcaNonCalibrated("Label", "Features"))
                 .Append(_mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
         }
     }
