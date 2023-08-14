@@ -11,7 +11,7 @@ namespace yuisanae2f.StrAICS
         [LoadColumn(0)]
         public string? input;
 
-        [LoadColumn(1)]
+        [LoadColumn(1), ColumnName("Label")]
         public T? output;
     }
 
@@ -22,6 +22,6 @@ namespace yuisanae2f.StrAICS
     public class Response<T>
     {
         [ColumnName("PredictedLabel")]
-        public T? predicted;
+        public T? predicted { get; set; }
     }
 }
