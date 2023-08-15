@@ -48,6 +48,13 @@ namespace yuisanae2f.StrAICS.ML.Binary
             public T predicted;
         }
 
+        private struct req
+        {
+            public string input;
+            public T output;
+            public bool brobability;
+        }
+
         /// <summary>
         /// Splited dataview
         /// </summary>
