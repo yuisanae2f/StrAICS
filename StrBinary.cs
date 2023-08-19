@@ -112,12 +112,19 @@ namespace yuisanae2f.StrAICS.ML.Binary
         {
             pipeline =
                 _mlContext.Transforms.Conversion.MapValueToKey("Label")
-                .Append(_mlContext.Transforms.Conversion.ConvertType("condFloat", "cond")) // Convert int to float
+                .Append(_mlContext.Transforms.Conversion.ConvertType("condFloat", "cond"))
                 .Append(_mlContext.Transforms.Categorical.OneHotEncoding("input"))
                 .Append(_mlContext.Transforms.Concatenate("Features", "input", "condFloat"))
                 .Append(_mlContext.Transforms.NormalizeMinMax("Features"))
                 .Append(_mlContext.Transforms.Conversion.MapKeyToValue("Label"))
                 .Append(_mlContext.BinaryClassification.Trainers.SdcaLogisticRegression());
+        }
+    }
+    public class Generator<T> : Classifier<T>
+    {
+        public Generator(MLContext? mLContext = null) : base(mLContext)
+        {
+
         }
     }
 }
