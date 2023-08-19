@@ -120,6 +120,7 @@ namespace yuisanae2f.StrAICS.ML.Binary
                 .Append(_mlContext.BinaryClassification.Trainers.SdcaLogisticRegression());
         }
     }
+
     public class Generator<T> : Classifier<T>
     {
         public Generator(MLContext? mLContext = null) : base(mLContext)
