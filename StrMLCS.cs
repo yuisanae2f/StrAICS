@@ -2,8 +2,9 @@
 
 namespace yuisanae2f.StrAICS.ML
 {
-    public class _Root<T, Tres>
+    public class _Root<T, Treq, Tres>
         where Tres : class, new()
+        where Treq : class, new()
     {
         /// <summary>
         /// Context for the each Machine Learning
@@ -12,7 +13,7 @@ namespace yuisanae2f.StrAICS.ML
 
         /// <param name="resArr">Parsed list of <typeparamref name="T"/> for the training.</param>
         /// <returns>DataView splited for the training.</returns>
-        protected IDataView? splitDataView(Request<T>[] resArr)
+        protected IDataView? splitDataView(Treq[] resArr)
         {
             return _mlContext.Data.LoadFromEnumerable(resArr);
         }
@@ -23,7 +24,7 @@ namespace yuisanae2f.StrAICS.ML
         /// make sure that you don't fill the output member in that context.
         /// </param>
         /// <returns>Would return a prediction for the <paramref name="target"/></returns>
-        protected Tres getPredict(PredictionEngine<Request<T>, Tres> engine, Request<T> target)
+        protected Tres getPredict(PredictionEngine<Treq, Tres> engine, Treq target)
         {
             return engine.Predict(target);
         }
@@ -61,8 +62,9 @@ namespace yuisanae2f.StrAICS.ML
         }
     }
 
-    public class Root<T, Tres> : _Root<T, Tres> 
+    public class Root<T, Treq, Tres> : _Root<T, Treq, Tres> 
         where Tres : class, new()
+        where Treq : class, new()
     {
         public Root(MLContext? mLContext = null)
         {
@@ -72,13 +74,13 @@ namespace yuisanae2f.StrAICS.ML
         /// <summary>
         /// Engine, will actually do predict.
         /// </summary>
-        public PredictionEngine<Request<T>, Tres> engine;
+        public PredictionEngine<Treq, Tres> engine;
 
         /// <summary>
         /// Splited dataview
         /// </summary>
-        public Request<T>[] dataView { get { return dataView; } set { _dataView = splitDataView(value); } }
-        private IDataView? _dataView;
+        public Treq[] dataView { set { _dataView = splitDataView(value); } }
+        protected IDataView? _dataView;
 
         /// <summary>
         /// AI Model, it would be the object for get result.
@@ -102,7 +104,7 @@ namespace yuisanae2f.StrAICS.ML
         public void load(string path = "model.zip")
         {
             model = loadModel(path);
-            engine = _mlContext.Model.CreatePredictionEngine<Request<T>, Tres>(model);
+            engine = _mlContext.Model.CreatePredictionEngine<Treq, Tres>(model);
             return;
         }
 
@@ -119,17 +121,7 @@ namespace yuisanae2f.StrAICS.ML
             else if (_dataView == null) return;
             else model = getModel(dataView, pipeline);
 
-            engine = _mlContext.Model.CreatePredictionEngine<Request<T>, Tres>(model);
-        }
-
-        /// <summary>
-        /// would run the model.
-        /// </summary>
-        /// <param name="target">Input Object. Make sure it is made of <typeparamref name="T"/></param>
-        /// <returns>Predicted Value made of <typeparamref name="TPredict"/></returns>
-        public Tres predict(string target)
-        {
-            return getPredict(engine, new Request<T>() { input = target });
+            engine = _mlContext.Model.CreatePredictionEngine<Treq, Tres>(model);
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
-using Microsoft.ML.Trainers;
-using Newtonsoft.Json;
-using System.Reflection.Metadata.Ecma335;
+using yuisanae2f.StrAICS.ML.Binary.MultiClassification;
 
 namespace yuisanae2f.StrAICS.ML.Binary
 {
@@ -20,7 +18,7 @@ namespace yuisanae2f.StrAICS.ML.Binary
         public float score { get { return predicted ? probability : 1 - probability; } }
     }
 
-    public class Binary : Root<bool, Response>
+    public class Binary : Root<bool, Request<bool>, Response>
     {
         /// <summary>
         /// Initialiser for this Object.
@@ -38,9 +36,21 @@ namespace yuisanae2f.StrAICS.ML.Binary
                     featureColumnName: "Features"
                     ));
         }
+
+        public Response predict(string target) { return getPredict(engine, new Request<bool> { input = target }); }
     }
 
-    public class Classifier<T> : Root<bool, Response>
+    namespace MultiClassification
+    {
+        public class req
+        {
+            [LoadColumn(0)] public string input;
+            [LoadColumn(1)] public int cond;
+            [LoadColumn(2), ColumnName("Label")] public bool output;
+        }
+    }
+
+    public class Classifier<T> : Root<bool, req, Response>
     {
         public struct res
         {
@@ -48,24 +58,15 @@ namespace yuisanae2f.StrAICS.ML.Binary
             public T predicted;
         }
 
-        private struct req
-        {
-            public string input;
-            public T output;
-            public bool brobability;
-        }
-
         /// <summary>
         /// Splited dataview
         /// </summary>
         public new Request<T>[] dataView
         {
-            get { return dataView; } 
-            set 
+            set
             {
                 _labels = new List<T>();
-
-                List<Request<bool>> reqs = new List<Request<bool>>();
+                List<req> reqs = new List<req>();
 
                 foreach(T output in value.Select(x => x.output))
                 {
@@ -76,29 +77,30 @@ namespace yuisanae2f.StrAICS.ML.Binary
                 {
                     for (int i = 0; i < _labels.Count; i++)
                     {
-                        reqs.Add(new Request<bool>()
+                        reqs.Add(new req()
                         {
-                            input = JsonConvert.SerializeObject(new Request<int>() { input = datum.input, output = i }),
+                            input = datum.input,
+                            cond = i,
                             output = Equals(_labels[i], datum.output)
                         });
                     }
                 }
 
-                base.dataView = reqs.ToArray();
+                _dataView = _mlContext.Data.LoadFromEnumerable(reqs);
             }
         }
 
         public List<T> labels { get { return _labels; } }
         private List<T> _labels;
 
-        public new res predict(string target)
+        public res predict(string target)
         {
             res _ = new res();
 
             List<float>  resArr = new List<float>();
-            foreach(T lbl in _labels)
+            for (int i = 0; i < _labels.ToArray().Length; i++)
             {
-                resArr.Add(base.predict(JsonConvert.SerializeObject(new Request<T>() { input = target, output = lbl })).probability);
+                resArr.Add(getPredict(engine, new req { input = target, cond = i}).probability);
             } _.scores = resArr.ToArray();
 
             _.predicted = _labels[resArr.IndexOf(resArr.Max())];
@@ -109,11 +111,13 @@ namespace yuisanae2f.StrAICS.ML.Binary
         public Classifier(MLContext? mLContext = null) : base(mLContext)
         {
             pipeline =
-                _mlContext.Transforms.Text.FeaturizeText(outputColumnName: "Features", inputColumnName: "input")
-                .Append(_mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(
-                    labelColumnName: "Label",
-                    featureColumnName: "Features"
-                    ));
+                _mlContext.Transforms.Conversion.MapValueToKey("Label")
+                .Append(_mlContext.Transforms.Conversion.ConvertType("condFloat", "cond")) // Convert int to float
+                .Append(_mlContext.Transforms.Categorical.OneHotEncoding("input"))
+                .Append(_mlContext.Transforms.Concatenate("Features", "input", "condFloat"))
+                .Append(_mlContext.Transforms.NormalizeMinMax("Features"))
+                .Append(_mlContext.Transforms.Conversion.MapKeyToValue("Label"))
+                .Append(_mlContext.BinaryClassification.Trainers.SdcaLogisticRegression());
         }
     }
 }
