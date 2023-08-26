@@ -1,55 +1,8 @@
 ﻿using Microsoft.ML;
-using Microsoft.ML.Data;
 using yuisanae2f.StrAICS.ML.Binary.MultiClassification;
 
 namespace yuisanae2f.StrAICS.ML.Binary
 {
-    public class Response : Response<bool>
-    {
-        /// <summary>
-        /// The probability that given input could be predicted "true"
-        /// </summary>
-        [ColumnName("Probability")]
-        public float probability { get; set; }
-
-        /// <summary>
-        /// The probability that the prediction had now isn't wrong
-        /// </summary>
-        public float score { get { return predicted ? probability : 1 - probability; } }
-    }
-
-    public class Binary : Root<bool, Request<bool>, Response>
-    {
-        /// <summary>
-        /// Initialiser for this Object.
-        /// </summary>
-        /// <param name="mLContext">
-        /// Custom mlContext. <br/>
-        /// If not given it would generate by itself.
-        /// </param>
-        public Binary(MLContext? mLContext = null) : base(mLContext)
-        {
-            pipeline =
-                _mlContext.Transforms.Text.FeaturizeText(outputColumnName: "Features", inputColumnName: "input")
-                .Append(_mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(
-                    labelColumnName: "Label",
-                    featureColumnName: "Features"
-                    ));
-        }
-
-        public Response predict(string target) { return getPredict(engine, new Request<bool> { input = target }); }
-    }
-
-    namespace MultiClassification
-    {
-        public class req
-        {
-            [LoadColumn(0)] public string input;
-            [LoadColumn(1)] public int cond;
-            [LoadColumn(2), ColumnName("Label")] public bool output;
-        }
-    }
-
     public class Classifier<T> : Root<bool, req, Response>
     {
         public struct res
@@ -58,9 +11,6 @@ namespace yuisanae2f.StrAICS.ML.Binary
             public T predicted;
         }
 
-        /// <summary>
-        /// Splited dataview
-        /// </summary>
         public new Request<T>[] dataView
         {
             set
@@ -118,14 +68,6 @@ namespace yuisanae2f.StrAICS.ML.Binary
                 .Append(_mlContext.Transforms.NormalizeMinMax("Features"))
                 .Append(_mlContext.Transforms.Conversion.MapKeyToValue("Label"))
                 .Append(_mlContext.BinaryClassification.Trainers.SdcaLogisticRegression());
-        }
-    }
-
-    public class Generator<T> : Classifier<T>
-    {
-        public Generator(MLContext? mLContext = null) : base(mLContext)
-        {
-
         }
     }
 }
