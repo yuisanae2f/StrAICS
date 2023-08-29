@@ -21,7 +21,7 @@ namespace yuisanae2f.StrAICS.ML
         protected ITransformer model;
         protected IEstimator<ITransformer> pipeline;
 
-        public Root(Treq[]? dataForTrain, MLContext? mLContext = null)
+        public Root(MLContext? mLContext = null, Treq[]? dataForTrain = null)
         {
             if (mLContext == null) _mlContext = new MLContext(); else _mlContext = mLContext;
             if (dataForTrain != null) dataView = dataForTrain;
