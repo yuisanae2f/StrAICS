@@ -47,10 +47,11 @@ namespace yuisanae2f.StrAICS.ML.Binary
         {
             res _ = new res();
 
-            List<float>  resArr = new List<float>();
+            List<float> resArr = new List<float>();
             for (int i = 0; i < _labels.ToArray().Length; i++)
             {
-                resArr.Add(getPredict(engine, new req { input = target, cond = i}).probability);
+                float pro = getPredict(engine, new req { input = target, cond = i }).probability;
+                resArr.Add(pro);
             } _.scores = resArr.ToArray();
 
             _.predicted = _labels[resArr.IndexOf(resArr.Max())];
@@ -71,3 +72,5 @@ namespace yuisanae2f.StrAICS.ML.Binary
         }
     }
 }
+
+// © 2023. YuiSanae2f

@@ -17,3 +17,5 @@ namespace yuisanae2f.StrAICS.ML.Binary
         public Response predict(string target) { return getPredict(engine, new Request<bool> { input = target }); }
     }
 }
+
+// © 2023. YuiSanae2f

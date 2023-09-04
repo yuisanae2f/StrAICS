@@ -9,3 +9,5 @@ namespace yuisanae2f.StrAICS.ML.Binary.MultiClassification
         [LoadColumn(2), ColumnName("Label")] public bool output;
     }
 }
+
+// © 2023. YuiSanae2f

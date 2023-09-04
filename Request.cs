@@ -15,3 +15,5 @@ namespace yuisanae2f.StrAICS
         public T? output;
     }
 }
+
+// © 2023.YuiSanae2f

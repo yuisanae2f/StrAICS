@@ -10,3 +10,5 @@ namespace yuisanae2f.StrAICS.ML.Binary
         public float score { get { return predicted ? probability : 1 - probability; } }
     }
 }
+
+// © 2023. YuiSanae2f

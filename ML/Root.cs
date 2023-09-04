@@ -46,7 +46,10 @@ namespace yuisanae2f.StrAICS.ML
         public void train()
         {
             if (_dataView == null) return;
+            model = getModel(_dataView, pipeline);
             engine = _mlContext.Model.CreatePredictionEngine<Treq, Tres>(model);
         }
     }
 }
+
+// © 2023. YuiSanae2f

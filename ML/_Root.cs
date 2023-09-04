@@ -82,3 +82,5 @@ namespace yuisanae2f.StrAICS.ML
         }
     }
 }
+
+// © 2023. YuiSanae2f
