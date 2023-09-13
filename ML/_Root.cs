@@ -19,13 +19,18 @@ namespace yuisanae2f.StrAICS.ML
         where Tres : class, new()
         where Treq : class, new()
     {
+        
+        protected MLContext ctx;
+
+        public _Root(MLContext? mLContext = null) { ctx = mLContext == null ? new MLContext() : mLContext; }
+
         /// <summary>
         /// <typeparamref name="Treq"/>의 배열을 모델의 학습을 위한 형태로 바꾸는 작업을 수행합니다.
         /// </summary>
         /// <param name="ctx">ML.NET에서 표준으로 사용하는 모델의 학습 환경 정의자</param>
         /// <param name="resArr">학습에 사용될 데이터 묶음</param>
         /// <returns>전처리가 완료되어 <paramref name="ctx"/>에서 정의된 모델 학습에 사용될 수 있는 데이터베이스</returns>
-        protected IDataView? splitDataView(MLContext ctx, Treq[] resArr)
+        protected IDataView? splitDataView(Treq[] resArr)
         {
             return ctx.Data.LoadFromEnumerable(resArr);
         }
@@ -44,11 +49,10 @@ namespace yuisanae2f.StrAICS.ML
         /// <summary>
         /// 학습이 완료된 모델을 학습에 사용된 데이터와 함께 zip 형태의 압축 파일로 <paramref name="path"/>에 저장한다.
         /// </summary>
-        /// <param name="ctx">ML.NET에서 표준으로 사용하는 모델의 학습 환경 정의자</param>
         /// <param name="path">학습이 완료된 모델 <paramref name="model"/>이 저장될 경로</param>
         /// <param name="model">학습이 완료된 모델</param>
         /// <param name="dataView">학습에 사용된 데이터베이스</param>
-        protected void saveModel(MLContext ctx, string path, ITransformer model, IDataView dataView)
+        protected void saveModel(string path, ITransformer model, IDataView dataView)
         {
             using (var fs = new FileStream(path, FileMode.Create))
                 ctx.Model.Save(model, dataView.Schema, fs);
@@ -57,10 +61,9 @@ namespace yuisanae2f.StrAICS.ML
         /// <summary>
         /// <paramref name="path"/>에 zip의 형태로 저장된 모델을 불러오는 작업을 수행한다.
         /// </summary>
-        /// <param name="ctx">ML.NET에서 표준으로 사용하는 모델의 학습 환경 정의자</param>
         /// <param name="path">모델이 저장된 경로</param>
         /// <returns><paramref name="path"/>에서 불러온 모델</returns>
-        protected ITransformer loadModel(MLContext ctx, string path)
+        protected ITransformer loadModel(string path)
         {
             ITransformer model;
 

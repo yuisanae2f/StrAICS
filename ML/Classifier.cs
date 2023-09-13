@@ -17,11 +17,11 @@ namespace yuisanae2f.StrAICS.ML
         public Classifier(MLContext? mLContext = null) : base(mLContext) 
         {
             pipeline =
-                _mlContext.Transforms.Conversion.MapValueToKey(inputColumnName: "Label", outputColumnName: "Label")
-                .Append(_mlContext.Transforms.Text.FeaturizeText(inputColumnName: "input", outputColumnName: "inputFeaturised"))
-                .Append(_mlContext.Transforms.Concatenate("Features", "inputFeaturised"))
-                .Append(_mlContext.MulticlassClassification.Trainers.SdcaNonCalibrated("Label", "Features"))
-                .Append(_mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
+                ctx.Transforms.Conversion.MapValueToKey(inputColumnName: "Label", outputColumnName: "Label")
+                .Append(ctx.Transforms.Text.FeaturizeText(inputColumnName: "input", outputColumnName: "inputFeaturised"))
+                .Append(ctx.Transforms.Concatenate("Features", "inputFeaturised"))
+                .Append(ctx.MulticlassClassification.Trainers.SdcaNonCalibrated("Label", "Features"))
+                .Append(ctx.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
         }
 
         public Response<T> predict(string target) { return getPredict(engine, new Request<T>() { input = target }); }

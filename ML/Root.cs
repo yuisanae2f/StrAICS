@@ -15,27 +15,23 @@ namespace yuisanae2f.StrAICS.ML
         protected MLContext _mlContext;
         public PredictionEngine<Treq, Tres> engine;
 
-        public Treq[] dataView { set { _dataView = splitDataView(_mlContext, value); } }
+        public Treq[] dataView { set { _dataView = splitDataView(value); } }
         protected IDataView? _dataView;
 
         protected ITransformer model;
         protected IEstimator<ITransformer> pipeline;
 
-        public Root(MLContext? mLContext = null, Treq[]? dataForTrain = null)
-        {
-            if (mLContext == null) _mlContext = new MLContext(); else _mlContext = mLContext;
-            if (dataForTrain != null) dataView = dataForTrain;
-        }
+        public Root(MLContext? mLContext = null) : base(mLContext) { }
 
         public void save(string path = "model.zip")
         {
-            saveModel(_mlContext, path, model, _dataView);
+            saveModel(path, model, _dataView);
         }
 
         public void load(string path = "model.zip")
         {
-            model = loadModel(_mlContext, path);
-            engine = _mlContext.Model.CreatePredictionEngine<Treq, Tres>(model);
+            model = loadModel(path);
+            engine = ctx.Model.CreatePredictionEngine<Treq, Tres>(model);
             return;
         }
 
@@ -47,7 +43,7 @@ namespace yuisanae2f.StrAICS.ML
         {
             if (_dataView == null) return;
             model = getModel(_dataView, pipeline);
-            engine = _mlContext.Model.CreatePredictionEngine<Treq, Tres>(model);
+            engine = ctx.Model.CreatePredictionEngine<Treq, Tres>(model);
         }
     }
 }
