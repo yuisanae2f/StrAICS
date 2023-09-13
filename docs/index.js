@@ -1,13 +1,13 @@
-strArr = {
-    span: [
-        {
-            ko: "언어",
-            en: "Languages"
-        },
+strArr = [
+    {
+        id: "translate",
+        ko: "언어",
+        en: "Languages"
+    },
 
-        {
-            ko: "구조",
-            en: "Structure"
-        }
-    ]
-}
+    {
+        id: "struct",
+        ko: "구조",
+        en: "Structure"
+    }
+];
