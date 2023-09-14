@@ -31,13 +31,14 @@ function endl(count = 1) {
 function _init() {
     // 주어진 URL 문자열
     const urlString = window.location.href.toString();
+    const browserLang = (navigator.language || navigator.userLanguage).split("-")[0];
 
     // "q" 매개변수의 값을 가져오기
     let langCode0 = urlString.split('?')[1];
-    let langCode1 = langCode0 === undefined ? "ko" : langCode0.split('=')[1];
-    let langCode = langCode1 === undefined ? "ko" : langCode1.split('#')[0];
+    let langCode1 = langCode0 === undefined ? browserLang : langCode0.split('=')[1];
+    let langCode = langCode1 === undefined ? browserLang : langCode1.split('#')[0];
 
-    langCode = langCode === null ? "ko" : langCode;
+    langCode = langCode === null ? browserLang : langCode;
 
     document.write('<p class="indent" style="color:rgb(95, 95, 95); font-size: 10px;">© 2023. YuiSanae2f</p>');
     document.getElementById("_t").innerHTML = `<h2 id="translate"></h2><div class="box indent"><d onclick="_translate('ko')">한국어</d><br><d onclick="_translate('en')">English</d><br></div>`;

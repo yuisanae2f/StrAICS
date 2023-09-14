@@ -41,7 +41,7 @@ strArr = [
         en: 
         'It will determine\n'
         + 'the <a href="https://yuisanae2f.github.io/YuiSanae2f/dictionary/dataType">data type</a>\n'
-        + 'of the <a href="#output" class="mark">expected output</a>'
+        + 'of the <a href="#output" class="mark">expected output</a>.'
     },
 
     {
@@ -51,12 +51,12 @@ strArr = [
         + '<a href="https://yuisanae2f.github.io/YuiSanae2f/dictionary/pointer/array/string" class="reservedKey">string</a>\n'
         + '형태로 입력받는 것을 권장합니다.',
         en:
-        ''
+        'Using <a href="https://yuisanae2f.github.io/YuiSanae2f/dictionary/pointer/array/string" class="reservedKey">string</a> for input option is highly recommended.'
     },
 
     {
         id: "output[0]",
         ko: '출력값의 형태는 다양하게 표현될 수 있을 것입니다.',
-        en: ''
+        en: 'Output format could be variously determined by <a href="#T" class="generic">T</a>.'
     }
 ];
