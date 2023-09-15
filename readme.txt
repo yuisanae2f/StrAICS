@@ -1,4 +1,4 @@
 # StrToStrAi
-Project written in : https://github.com/Louibooks/StrToStrAI
+Documentation: https://louibooks.github.io/StrAICS/
 Made by: https://github.com/Louibooks
-Our work is: https://louibooks.com/
+Our work is in: https://louibooks.com/
